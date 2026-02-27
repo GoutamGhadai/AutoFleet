@@ -29,6 +29,17 @@
         // --- Theme Configuration Engine ---
 
 // --- Theme Configuration Engine ---
+// import React, { useState, useEffect, useMemo, useContext } from 'react';
+// import { 
+//   Car, Bike, Wrench, LayoutDashboard, Plus, Trash2, Edit3, 
+//   Sun, Moon, Cpu, Download, Upload, AlertTriangle, CheckCircle2, 
+//   ChevronRight, Calendar, Activity, Info, Settings, ShieldAlert,
+//   FileText, ShieldCheck, PenTool, Droplet, Search, X,
+//   Menu, ChevronLeft, Copy, RefreshCw, BarChart2, PieChart, LineChart, Sliders,
+//   IndianRupee, Gauge, Zap, Clock, Target, Bell, Maximize, Minimize, Filter, Power, AlertOctagon
+// } from 'lucide-react';
+
+// --- Theme Configuration Engine ---
 const THEMES = {
   arctic: {
     bg: 'bg-slate-50 text-slate-800',
@@ -463,6 +474,9 @@ function AnimatedLogo({ t }) {
 
 function AnimatedCounter({ value, isCurrency = false, isDistance = false, className = "" }) {
   const [displayValue, setDisplayValue] = useState(0);
+  const [isCompact, setIsCompact] = useState(false);
+  const containerRef = React.useRef(null);
+  const fullTextRef = React.useRef(null);
 
   useEffect(() => {
     let start = 0;
@@ -488,13 +502,61 @@ function AnimatedCounter({ value, isCurrency = false, isDistance = false, classN
     requestAnimationFrame(animate);
   }, [value]);
 
-  const formatted = isCurrency 
-    ? formatCurrency(displayValue) 
-    : isDistance 
-      ? `${displayValue.toLocaleString()} km` 
-      : displayValue.toLocaleString();
+  useEffect(() => {
+    if (!containerRef.current || !fullTextRef.current) return;
+    
+    const checkWidth = () => {
+      if (!containerRef.current || !fullTextRef.current) return;
+      const fullWidth = fullTextRef.current.offsetWidth;
+      const allocatedWidth = containerRef.current.offsetWidth;
+      
+      // Use requestAnimationFrame to prevent ResizeObserver loop limit errors
+      requestAnimationFrame(() => {
+        if (fullWidth > allocatedWidth + 4) { // 4px buffer
+          setIsCompact(true);
+        } else {
+          setIsCompact(false);
+        }
+      });
+    };
 
-  return <span className={`font-mono tracking-tight ${className}`}>{formatted}</span>;
+    const observer = new ResizeObserver(checkWidth);
+    observer.observe(containerRef.current);
+    checkWidth();
+
+    return () => observer.disconnect();
+  }, [displayValue]);
+
+  const formatCompact = (val) => {
+    if (val >= 10000000) return +(val / 10000000).toFixed(2) + 'Cr';
+    if (val >= 100000) return +(val / 100000).toFixed(2) + 'L';
+    if (val >= 1000) return +(val / 1000).toFixed(2) + 'K';
+    return val.toLocaleString('en-IN');
+  };
+
+  const getFormatted = (val, compact) => {
+    if (compact) {
+      const numStr = formatCompact(val);
+      if (isCurrency) return `₹${numStr}`;
+      if (isDistance) return `${numStr} km`;
+      return numStr;
+    } else {
+      if (isCurrency) return formatCurrency(val);
+      if (isDistance) return `${val.toLocaleString('en-IN')} km`;
+      return val.toLocaleString('en-IN');
+    }
+  };
+
+  return (
+    <span ref={containerRef} className={`relative inline-flex w-full max-w-full overflow-hidden align-bottom font-mono tracking-tight ${className}`}>
+      <span ref={fullTextRef} className="absolute invisible whitespace-nowrap pointer-events-none" aria-hidden="true">
+        {getFormatted(displayValue, false)}
+      </span>
+      <span className="truncate w-full">
+        {getFormatted(displayValue, isCompact)}
+      </span>
+    </span>
+  );
 }
 
 function ConfirmModal({ dialog, closeDialog }) {
