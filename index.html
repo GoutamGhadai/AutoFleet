@@ -29,6 +29,8 @@
         // --- Theme Configuration Engine ---
 
 // --- Theme Configuration Engine ---
+// --- Theme Configuration Engine ---
+// --- Theme Configuration Engine ---
 // import React, { useState, useEffect, useMemo, useContext } from 'react';
 // import { 
 //   Car, Bike, Wrench, LayoutDashboard, Plus, Trash2, Edit3, 
@@ -472,6 +474,50 @@ function AnimatedLogo({ t }) {
   );
 }
 
+function GlowingPulseIcon({ size = 24, className = "" }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <defs>
+        <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      {/* Faint background track drawn left-to-right */}
+      <path d="M2 12h4l3-9 6 18 3-9h4" opacity="0.15" />
+      {/* Moving neon pulse */}
+      <path d="M2 12h4l3-9 6 18 3-9h4" className="animate-pulse-travel" filter="url(#neon-glow)" />
+    </svg>
+  );
+}
+
+function GlowingGaugeIcon({ size = 24, className = "" }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <defs>
+        <filter id="neon-glow-gauge" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      {/* Faint background track */}
+      <path d="M3.34 16A10 10 0 1 1 20.66 16" opacity="0.15" />
+      {/* Glowing Arc */}
+      <path d="M3.34 16A10 10 0 1 1 20.66 16" filter="url(#neon-glow-gauge)" />
+      {/* Animated Needle */}
+      <path d="m12 14 4-4" filter="url(#neon-glow-gauge)" className="animate-gauge-needle" style={{ transformOrigin: '12px 14px' }} />
+      {/* Center Pin */}
+      <circle cx="12" cy="14" r="2" fill="currentColor" filter="url(#neon-glow-gauge)" />
+    </svg>
+  );
+}
+
 function AnimatedCounter({ value, isCurrency = false, isDistance = false, className = "" }) {
   const [displayValue, setDisplayValue] = useState(0);
   const [isCompact, setIsCompact] = useState(false);
@@ -610,7 +656,7 @@ function NavItem({ icon, label, active, collapsed, onClick }) {
 }
 
 // --- Shared Hero Header Component ---
-function HeroHeader({ t, title, subtitle, icon: Icon, actionLabel, onAction, actionIcon: ActionIcon }) {
+function HeroHeader({ t, title, subtitle, icon: Icon, iconClass = "", actionLabel, onAction, actionIcon: ActionIcon }) {
   return (
     <div className={`${t.isCompact ? 'p-4 rounded-xl' : 'p-6 md:p-8 rounded-3xl'} flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 overflow-hidden relative min-w-0 shadow-lg group border border-zinc-800 bg-zinc-950 text-white transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]`}>
       {/* Carbon Fiber Pattern Grid */}
@@ -624,7 +670,7 @@ function HeroHeader({ t, title, subtitle, icon: Icon, actionLabel, onAction, act
 
       <div className="flex items-center gap-4 md:gap-5 min-w-0 z-20 relative">
          <div className={`${t.isCompact ? 'p-2 rounded-lg' : 'p-3 rounded-2xl'} bg-white/10 backdrop-blur-md border border-white/20 shadow-inner hidden sm:block`}>
-            {Icon && <Icon size={t.isCompact ? 24 : 32} className="text-cyan-400" />}
+            {Icon && <Icon size={t.isCompact ? 24 : 32} className={`text-cyan-400 ${iconClass}`} />}
          </div>
          <div>
             <h1 className={`${t.isCompact ? 'text-2xl md:text-3xl' : 'text-3xl md:text-4xl'} font-black tracking-tight text-white drop-shadow-md ${t.isCompact ? '' : 'italic transform -skew-x-6'}`}>
@@ -815,7 +861,8 @@ function Dashboard({ vehicles, maintenance, consumables, reminders, setReminders
         t={t}
         title="Telemetry Dashboard"
         subtitle="Complete fleet overview at a glance"
-        icon={Activity}
+        icon={GlowingPulseIcon}
+        iconClass="animate-hero-dash"
         actionLabel="Onboard Vehicle"
         actionIcon={Plus}
         onAction={() => navigateTo('add-vehicle')}
@@ -945,7 +992,7 @@ function Dashboard({ vehicles, maintenance, consumables, reminders, setReminders
 
               <h2 className={`${t.isCompact ? 'mb-4' : 'mb-8'} text-xl font-black flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10`}>
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl shadow-inner flex-shrink-0 ${t.iconBg}`}><Gauge size={22} /></div>
+                  <div className={`p-2 rounded-xl shadow-inner flex-shrink-0 ${t.iconBg}`}><GlowingGaugeIcon size={22} /></div>
                   Fleet Cost Telemetry
                 </div>
                 <div className="flex gap-4 bg-black/5 dark:bg-white/5 px-4 py-2 rounded-xl border border-current border-opacity-10 shadow-inner">
@@ -1257,7 +1304,7 @@ function TelemetryChart({ vehicles, maintenance, consumables, t }) {
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 relative z-10">
         <h2 className="text-xl font-black flex items-center gap-3">
-          <div className={`p-2 rounded-xl shadow-inner flex-shrink-0 ${t.iconBg}`}><Activity size={22} /></div>
+          <div className={`p-2 rounded-xl shadow-inner flex-shrink-0 ${t.iconBg}`}><GlowingPulseIcon size={22} /></div>
           Expenditure Trends
         </h2>
 
@@ -1452,6 +1499,7 @@ function VehicleList({ vehicles, navigateTo }) {
         title="Fleet Roster"
         subtitle="Active garage bays & status"
         icon={Car}
+        iconClass="animate-hero-car"
         actionLabel="Onboard Vehicle"
         actionIcon={Plus}
         onAction={() => navigateTo('add-vehicle')}
@@ -2181,6 +2229,7 @@ function MaintenanceList({ maintenance, vehicles, navigateTo, setMaintenance, sh
         title="Maintenance Logs"
         subtitle="Global history of all services & repairs"
         icon={Wrench}
+        iconClass="animate-hero-wrench"
         actionLabel="Log Event"
         actionIcon={Plus}
         onAction={() => navigateTo('add-maintenance')}
@@ -2580,6 +2629,7 @@ function ConsumableList({ consumables, vehicles, navigateTo, setConsumables, sho
         title="Consumables"
         subtitle="Track refueling, washing & upkeep"
         icon={Droplet}
+        iconClass="animate-hero-drop"
         actionLabel="Log Event"
         actionIcon={Plus}
         onAction={() => navigateTo('add-consumable')}
@@ -2831,6 +2881,7 @@ function ReminderForm({ vehicles, reminders, setReminders, navigateTo, showToast
           title="Schedule Task"
           subtitle="Set recurring or future reminders"
           icon={Bell}
+          iconClass="animate-hero-bell"
         />
       </div>
 
@@ -3000,6 +3051,7 @@ function ChartBuilder({ vehicles, maintenance, consumables }) {
         title="Analytics Builder"
         subtitle="Visualise telemetry & cost reports"
         icon={BarChart2}
+        iconClass="animate-hero-chart"
       />
 
       {/* Analytics Summary Report */}
@@ -3626,6 +3678,26 @@ style.innerHTML = `
   .animate-fast-wind-2 { animation: fastWind 0.8s linear infinite 0.2s; }
   .animate-fast-wind-3 { animation: fastWind 0.5s linear infinite 0.4s; }
 
+  /* Traveling Glow Line Animation */
+  @keyframes pulseTravel {
+    0% { stroke-dashoffset: 15; }
+    100% { stroke-dashoffset: -50; }
+  }
+  .animate-pulse-travel {
+    stroke-dasharray: 15 50;
+    animation: pulseTravel 2.5s linear infinite;
+  }
+
+  /* Gauge Needle Animation */
+  @keyframes gaugeNeedleRev {
+    0%, 100% { transform: rotate(-30deg); }
+    20% { transform: rotate(45deg); }
+    40% { transform: rotate(10deg); }
+    60% { transform: rotate(60deg); }
+    80% { transform: rotate(20deg); }
+  }
+  .animate-gauge-needle { animation: gaugeNeedleRev 4s cubic-bezier(0.4, 0, 0.2, 1) infinite; transform-origin: 12px 14px; }
+
   /* Sidebar Sporty Hover Animations */
   @keyframes tighten {
     0% { transform: rotate(0deg); }
@@ -3662,6 +3734,58 @@ style.innerHTML = `
     75% { transform: scale(1.05) rotate(6deg); }
   }
   .group:hover .nav-icon-dash { animation: dashPulse 0.4s ease-in-out infinite; }
+
+  /* Hero Header Specific Animations */
+  @keyframes heroDash {
+    0%, 100% { transform: scale(1); }
+    10% { transform: scale(1.15); }
+    20% { transform: scale(1); }
+    30% { transform: scale(1.15); }
+    40% { transform: scale(1); }
+  }
+  .animate-hero-dash { animation: heroDash 3s ease-in-out infinite; }
+
+  @keyframes heroCar {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+  .animate-hero-car { animation: heroCar 1.5s ease-in-out infinite; }
+
+  @keyframes heroWrench {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(15deg); }
+    20% { transform: rotate(-5deg); }
+    30% { transform: rotate(10deg); }
+    40% { transform: rotate(0deg); }
+  }
+  .animate-hero-wrench { animation: heroWrench 4s ease-in-out infinite; transform-origin: center; }
+
+  @keyframes heroDrop {
+    0%, 100% { transform: scale(1) translateY(0); }
+    15% { transform: scale(0.9, 1.1) translateY(-2px); }
+    30% { transform: scale(1.1, 0.9) translateY(1px); }
+    45% { transform: scale(1) translateY(0); }
+  }
+  .animate-hero-drop { animation: heroDrop 3s ease-in-out infinite; transform-origin: bottom; }
+
+  @keyframes heroChart {
+    0%, 100% { transform: scaleY(1); }
+    15% { transform: scaleY(1.15); }
+    30% { transform: scaleY(0.9); }
+    45% { transform: scaleY(1.1); }
+    60% { transform: scaleY(1); }
+  }
+  .animate-hero-chart { animation: heroChart 4s ease-in-out infinite; transform-origin: bottom; }
+
+  @keyframes heroBell {
+    0%, 100% { transform: rotate(0deg); }
+    5% { transform: rotate(15deg); }
+    10% { transform: rotate(-10deg); }
+    15% { transform: rotate(8deg); }
+    20% { transform: rotate(-5deg); }
+    25% { transform: rotate(0deg); }
+  }
+  .animate-hero-bell { animation: heroBell 5s ease-in-out infinite; transform-origin: top center; }
 `;
 document.head.appendChild(style);
         const root = ReactDOM.createRoot(document.getElementById('root'));
